@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="650.0" prefWidth="1000.0" style="-fx-background-color: #f4f7f6;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.demo9.controller.ContractorController">
+    <children>
+        <VBox spacing="15.0" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="15.0">
+            <children>
+                <Label text="Contractor Management" textFill="#8e44ad">
+                    <font>
+                        <Font name="System Bold" size="24.0" />
+                    </font>
+                </Label>
+                <HBox spacing="20.0" VBox.vgrow="ALWAYS">
+                    <children>
+                        <VBox prefWidth="300.0" spacing="10.0" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 0);">
+                            <children>
+                                <Label text="Contractor Details" textFill="#8e44ad">
+                                    <font> <Font name="System Bold" size="14.0" /> </font>
+                                </Label>
+                                <TextField fx:id="contractorIdField" promptText="Contractor ID" />
+                                <TextField fx:id="companyNameField" promptText="Company Name" />
+                                <TextField fx:id="creditLimitField" promptText="Credit Limit" />
+                                <Separator prefWidth="200.0" />
+                                <HBox alignment="CENTER" spacing="10.0">
+                                    <children>
+                                        <Button onAction="#onAddContractor" prefWidth="80.0" style="-fx-background-color: #27ae60;" text="Insert" textFill="WHITE" />
+                                        <Button prefWidth="80.0" style="-fx-background-color: #2980b9;" text="Update" textFill="WHITE" />
+                                        <Button prefWidth="80.0" style="-fx-background-color: #c0392b;" text="Delete" textFill="WHITE" />
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
+
+                        <VBox spacing="10.0" HBox.hgrow="ALWAYS">
+                            <children>
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <children>
+                                        <MenuButton text="Filter Columns">
+                                            <items>
+                                                <CheckMenuItem fx:id="menuId" selected="true" text="Contractor ID" onAction="#handleColumnVisibility"/>
+                                                <CheckMenuItem fx:id="menuName" selected="true" text="Company Name" onAction="#handleColumnVisibility"/>
+                                                <CheckMenuItem fx:id="menuCredit" selected="true" text="Credit Limit" onAction="#handleColumnVisibility"/>
+                                            </items>
+                                        </MenuButton>
+                                        <Button onAction="#handleViewContractors" text="Refresh Table" />
+                                    </children>
+                                </HBox>
+                                <TableView fx:id="contractorTable" VBox.vgrow="ALWAYS">
+                                    <columns>
+                                        <TableColumn fx:id="colContractorId" prefWidth="100.0" text="ID" />
+                                        <TableColumn fx:id="colCompanyName" prefWidth="300.0" text="Company Name" />
+                                        <TableColumn fx:id="colCreditLimit" prefWidth="150.0" text="Credit Limit" />
+                                    </columns>
+                                </TableView>
+                            </children>
+                        </VBox>
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>

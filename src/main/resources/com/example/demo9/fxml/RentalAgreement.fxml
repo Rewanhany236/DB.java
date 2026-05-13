@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="650.0" prefWidth="1100.0" style="-fx-background-color: #f4f7f6;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.demo9.controller.RentalAgreementController">
+    <children>
+        <VBox spacing="15.0" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="15.0">
+            <children>
+                <Label text="Rental Agreement Management" textFill="#8e44ad">
+                    <font>
+                        <Font name="System Bold" size="24.0" />
+                    </font>
+                </Label>
+                <HBox spacing="20.0" VBox.vgrow="ALWAYS">
+                    <children>
+                        <VBox prefWidth="320.0" spacing="10.0" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 0);">
+                            <children>
+                                <Label text="Contract Details" textFill="#34495e">
+                                    <font> <Font name="System Bold" size="14.0" /> </font>
+                                </Label>
+                                <TextField fx:id="rentalIdField" promptText="Rental ID" />
+                                <TextField fx:id="contractorIdField" promptText="Contractor ID (FK)" />
+                                <TextField fx:id="equipmentIdField" promptText="Equipment ID (FK)" />
+                                <DatePicker fx:id="startDatePicker" promptText="Start Date" prefWidth="290.0" />
+                                <DatePicker fx:id="endDatePicker" promptText="End Date" prefWidth="290.0" />
+                                <TextField fx:id="totalCostField" promptText="Total Cost" />
+                                <TextField fx:id="rentalStatusField" promptText="Rental Status (Active/Closed)" />
+
+                                <Separator prefWidth="200.0">
+                                    <VBox.margin>
+                                        <Insets bottom="5.0" top="5.0" />
+                                    </VBox.margin>
+                                </Separator>
+
+                                <HBox alignment="CENTER" spacing="10.0">
+                                    <children>
+                                        <Button onAction="#handleInsertRental" prefWidth="85.0" style="-fx-background-color: #27ae60;" text="Create" textFill="WHITE" />
+                                        <Button onAction="#handleUpdateRental" prefWidth="85.0" style="-fx-background-color: #2980b9;" text="Update" textFill="WHITE" />
+                                        <Button onAction="#handleDeleteRental" prefWidth="85.0" style="-fx-background-color: #c0392b;" text="Cancel" textFill="WHITE" />
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
+
+                        <VBox spacing="10.0" HBox.hgrow="ALWAYS">
+                            <children>
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <children>
+                                        <MenuButton text="Column Settings">
+                                            <items>
+                                                <CheckMenuItem fx:id="menuRentalId" selected="true" text="Rental ID" onAction="#handleColumnVisibility"/>
+                                                <CheckMenuItem fx:id="menuContName" selected="true" text="Contractor Name" onAction="#handleColumnVisibility"/>
+                                                <CheckMenuItem fx:id="menuEquipModel" selected="true" text="Equipment Model" onAction="#handleColumnVisibility"/>
+                                                <CheckMenuItem fx:id="menuCost" selected="true" text="Total Cost" onAction="#handleColumnVisibility"/>
+                                                <CheckMenuItem fx:id="menuStatus" selected="true" text="Status" onAction="#handleColumnVisibility"/>
+                                            </items>
+                                        </MenuButton>
+                                      <Button onAction="#handleRefreshTable" text="Normal View" />
+                                        <Button onAction="#handleGenerateJoinReport" style="-fx-background-color: #8e44ad;" text="Join Report (Details)" textFill="WHITE" />
+                                    </children>
+                                </HBox>
+
+                                <TableView fx:id="rentalTable" VBox.vgrow="ALWAYS">
+                                    <columns>
+                                        <TableColumn fx:id="colRentalId" prefWidth="70.0" text="ID" />
+                                        <TableColumn fx:id="colContName" prefWidth="180.0" text="Contractor" />
+                                        <TableColumn fx:id="colEquipModel" prefWidth="180.0" text="Equipment" />
+                                        <TableColumn fx:id="colTotalCost" prefWidth="100.0" text="Cost" />
+                                        <TableColumn fx:id="colRentalStatus" prefWidth="120.0" text="Status" />
+                                    </columns>
+                                    <placeholder>
+                                        <Label text="No data found. Click Refresh or Generate Report." />
+                                    </placeholder>
+                                </TableView>
+                            </children>
+                        </VBox>
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>
