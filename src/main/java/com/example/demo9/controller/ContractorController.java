@@ -10,6 +10,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 
 public class ContractorController {
 
+    // ================= FIELDS =================
     @FXML private TextField contractorIdField;
     @FXML private TextField companyNameField;
     @FXML private TextField creditLimitField;
@@ -17,28 +18,26 @@ public class ContractorController {
     @FXML private TextField emailField;
     @FXML private TextField phoneField;
 
+    // ================= TABLE =================
     @FXML private TableView<Contractor> contractorTable;
     @FXML private TableColumn<Contractor, Integer> colContractorId;
-    @FXML private TableColumn<Contractor, String>  colCompanyName;
-    @FXML private TableColumn<Contractor, Double>  colCreditLimit;
-    @FXML private TableColumn<Contractor, String>  colAddress;
-    @FXML private TableColumn<Contractor, String>  colEmail;
-    @FXML private TableColumn<Contractor, String>  colPhone;
+    @FXML private TableColumn<Contractor, String> colCompanyName;
+    @FXML private TableColumn<Contractor, Double> colCreditLimit;
+    @FXML private TableColumn<Contractor, String> colAddress;
+    @FXML private TableColumn<Contractor, String> colEmail;
+    @FXML private TableColumn<Contractor, String> colPhone;
 
-    @FXML private CheckMenuItem menuId;
-    @FXML private CheckMenuItem menuName;
-    @FXML private CheckMenuItem menuCredit;
-    @FXML private CheckMenuItem menuAddress;
-    @FXML private CheckMenuItem menuEmail;
-    @FXML private CheckMenuItem menuPhone;
-
+    // ================= LABEL STATUS =================
     @FXML private Label statusLabel;
 
+    // ================= DAO =================
     private final ContractorDAO dao = new ContractorDAO();
-    private final ObservableList<Contractor> data = FXCollections.observableArrayList();
+    private final ObservableList<Contractor> list = FXCollections.observableArrayList();
 
+    // ================= INITIALIZE =================
     @FXML
     public void initialize() {
+        // Setup table columns
         colContractorId.setCellValueFactory(new PropertyValueFactory<>("contractorId"));
         colCompanyName.setCellValueFactory(new PropertyValueFactory<>("companyName"));
         colCreditLimit.setCellValueFactory(new PropertyValueFactory<>("creditLimit"));
@@ -46,104 +45,201 @@ public class ContractorController {
         colEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
         colPhone.setCellValueFactory(new PropertyValueFactory<>("phone"));
 
-        contractorTable.setItems(data);
+        contractorTable.setItems(list);
 
-        contractorTable.getSelectionModel().selectedItemProperty().addListener((obs, old, sel) -> {
-            if (sel != null) {
-                contractorIdField.setText(String.valueOf(sel.getContractorId()));
-                companyNameField.setText(sel.getCompanyName());
-                creditLimitField.setText(String.valueOf(sel.getCreditLimit()));
-                addressField.setText(sel.getAddress() != null ? sel.getAddress() : "");
-                emailField.setText(sel.getEmail() != null ? sel.getEmail() : "");
-                phoneField.setText(sel.getPhone() != null ? sel.getPhone() : "");
-            }
-        });
-        handleViewContractors();
+        // Load data when clicking on row
+        contractorTable.getSelectionModel().selectedItemProperty().addListener(
+                (obs, old, newValue) -> {
+                    if (newValue != null) {
+                        fillFields(newValue);
+                    }
+                }
+        );
+
+        loadData();
     }
 
-    @FXML
-    private void onAddContractor() {
+    // ================= FILL FIELDS FROM SELECTED ROW =================
+    private void fillFields(Contractor c) {
+        contractorIdField.setText(String.valueOf(c.getContractorId()));
+        companyNameField.setText(c.getCompanyName());
+        creditLimitField.setText(String.valueOf(c.getCreditLimit()));
+        addressField.setText(c.getAddress());
+        emailField.setText(c.getEmail());
+        phoneField.setText(c.getPhone());
+    }
+
+    // ================= LOAD DATA =================
+    private void loadData() {
         try {
-            Contractor c = buildFromFields();
-            dao.insertContractor(c);
-            setStatus("Contractor inserted successfully.", true);
-            clearFields();
-            handleViewContractors();
-        } catch (Exception ex) {
-            setStatus("Insert failed: " + ex.getMessage(), false);
+            list.clear();
+            list.addAll(dao.getAllContractors());
+            setStatus("Loaded Successfully: " + list.size() + " records", true);
+        } catch (Exception e) {
+            setStatus("Load Failed: " + e.getMessage(), false);
+            e.printStackTrace();
         }
     }
 
+    // ================= INSERT =================
+    @FXML
+    private void handleInsert() {
+        try {
+            Contractor c = buildObject();
+            dao.insertContractor(c);
+            setStatus("Inserted Successfully", true);
+            loadData();
+            clearFields();
+        } catch (Exception e) {
+            setStatus("Insert Failed: " + e.getMessage(), false);
+            e.printStackTrace();
+        }
+    }
+
+    // ================= UPDATE =================
     @FXML
     private void handleUpdate() {
         try {
-            int id = Integer.parseInt(contractorIdField.getText().trim());
-            double limit = Double.parseDouble(creditLimitField.getText().trim());
-            dao.updateCreditLimit(id, limit);
-            setStatus("Credit limit updated.", true);
-            handleViewContractors();
-        } catch (Exception ex) {
-            setStatus("Update failed: " + ex.getMessage(), false);
+            String idText = contractorIdField.getText().trim();
+            if (idText.isEmpty()) {
+                setStatus("Please select a contractor first", false);
+                return;
+            }
+
+            Contractor c = buildObject();
+            dao.updateContractor(c);
+            setStatus("Updated Successfully", true);
+            loadData();
+            clearFields();
+        } catch (Exception e) {
+            setStatus("Update Failed: " + e.getMessage(), false);
+            e.printStackTrace();
         }
     }
 
+    // ================= DELETE =================
     @FXML
     private void handleDelete() {
         try {
-            int id = Integer.parseInt(contractorIdField.getText().trim());
-            dao.deleteContractor(id);
-            setStatus("Contractor deleted.", true);
-            clearFields();
-            handleViewContractors();
-        } catch (Exception ex) {
-            setStatus("Delete failed: " + ex.getMessage(), false);
+            String idText = contractorIdField.getText().trim();
+
+            if (idText.isEmpty()) {
+                Contractor selected = contractorTable.getSelectionModel().getSelectedItem();
+                if (selected == null) {
+                    setStatus("Please select a contractor first", false);
+                    return;
+                }
+                idText = String.valueOf(selected.getContractorId());
+            }
+
+            int id = Integer.parseInt(idText);
+
+            // Confirmation dialog
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Confirm Delete");
+            alert.setHeaderText(null);
+            alert.setContentText("Are you sure you want to delete contractor ID: " + id + "?");
+
+            if (alert.showAndWait().get() == ButtonType.OK) {
+                dao.deleteContractor(id);
+                setStatus("Deleted Successfully", true);
+                loadData();
+                clearFields();
+            }
+        } catch (Exception e) {
+            setStatus("Delete Failed: " + e.getMessage(), false);
+            e.printStackTrace();
         }
     }
 
     @FXML
-    public void handleViewContractors() {
+    // ================= SEARCH BY ID =================
+    private void handleSelect() {
         try {
-            data.setAll(dao.getAllContractors());
-            setStatus("Table refreshed. " + data.size() + " records.", true);
-        } catch (Exception ex) {
-            setStatus("Load failed: " + ex.getMessage(), false);
+            String idText = contractorIdField.getText().trim();
+
+            if (idText.isEmpty()) {
+                loadData();
+                setStatus("Showing all records", true);
+                return;
+            }
+
+            try {
+                int id = Integer.parseInt(idText);
+                Contractor contractor = dao.searchById(id);
+
+                list.clear();
+                if (contractor != null) {
+                    list.add(contractor);
+                    setStatus("Found contractor with ID: " + id, true);
+                    fillFields(contractor);
+                } else {
+                    setStatus("No contractor found with ID: " + id, false);
+                    clearFields();
+                }
+            } catch (NumberFormatException e) {
+                setStatus("Please enter a valid numeric ID", false);
+            }
+
+        } catch (Exception e) {
+            setStatus("Search Failed: " + e.getMessage(), false);
+            e.printStackTrace();
         }
     }
 
+    // ================= REFRESH =================
     @FXML
-    private void handleColumnVisibility() {
-        colContractorId.setVisible(menuId.isSelected());
-        colCompanyName.setVisible(menuName.isSelected());
-        colCreditLimit.setVisible(menuCredit.isSelected());
-        colAddress.setVisible(menuAddress.isSelected());
-        colEmail.setVisible(menuEmail.isSelected());
-        colPhone.setVisible(menuPhone.isSelected());
-    }
-
-    @FXML
-    private void handleClear() {
+    private void handleRefresh() {
+        loadData();
         clearFields();
-        contractorTable.getSelectionModel().clearSelection();
     }
 
-    private Contractor buildFromFields() {
-        int id = Integer.parseInt(contractorIdField.getText().trim());
-        String name = companyNameField.getText().trim();
-        double credit = Double.parseDouble(creditLimitField.getText().trim());
-        String address = addressField.getText().trim();
-        String email = emailField.getText().trim();
-        String phone = phoneField.getText().trim();
-        return new Contractor(id, name, credit, address, email, phone);
+    // ================= BUILD OBJECT =================
+    private Contractor buildObject() throws Exception {
+        String idText = contractorIdField.getText().trim();
+        if (idText.isEmpty()) {
+            throw new Exception("Contractor ID is required");
+        }
+
+        String nameText = companyNameField.getText().trim();
+        if (nameText.isEmpty()) {
+            throw new Exception("Company Name is required");
+        }
+
+        String creditText = creditLimitField.getText().trim();
+        if (creditText.isEmpty()) {
+            throw new Exception("Credit Limit is required");
+        }
+
+        return new Contractor(
+                Integer.parseInt(idText),
+                nameText,
+                Double.parseDouble(creditText),
+                addressField.getText(),
+                emailField.getText(),
+                phoneField.getText()
+        );
     }
 
+    // ================= CLEAR FIELDS =================
     private void clearFields() {
-        contractorIdField.clear(); companyNameField.clear(); creditLimitField.clear();
-        addressField.clear(); emailField.clear(); phoneField.clear();
+        contractorIdField.clear();
+        companyNameField.clear();
+        creditLimitField.clear();
+        addressField.clear();
+        emailField.clear();
+        phoneField.clear();
     }
 
-    private void setStatus(String msg, boolean ok) {
-        statusLabel.setText(msg);
-        statusLabel.setStyle(ok ? "-fx-text-fill: #27ae60; -fx-font-weight: bold;"
-                : "-fx-text-fill: #c0392b; -fx-font-weight: bold;");
+    // ================= SET STATUS =================
+    private void setStatus(String message, boolean success) {
+        if (statusLabel != null) {
+            statusLabel.setText(message);
+            if (success) {
+                statusLabel.setStyle("-fx-text-fill: green; -fx-font-weight: bold;");
+            } else {
+                statusLabel.setStyle("-fx-text-fill: red; -fx-font-weight: bold;");
+            }
+        }
     }
 }

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="650.0" prefWidth="1000.0"
+            style="-fx-background-color: #f4f7f6;"
+            xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.demo9.controller.EquipmentController">
+
+    <children>
+
+        <VBox spacing="15.0"
+              AnchorPane.topAnchor="15"
+              AnchorPane.bottomAnchor="15"
+              AnchorPane.leftAnchor="15"
+              AnchorPane.rightAnchor="15">
+
+            <!-- TITLE -->
+            <Label text="Equipment Management" textFill="#8e44ad">
+                <font>
+                    <Font size="24.0" />
+                </font>
+            </Label>
+
+            <HBox spacing="20.0" VBox.vgrow="ALWAYS">
+
+                <!-- LEFT FORM -->
+                <VBox prefWidth="300.0" spacing="10.0"
+                      style="-fx-background-color: white; -fx-padding: 15;
+                      -fx-background-radius: 10;
+                      -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 0);">
+
+                    <Label text="Equipment Details" textFill="#8e44ad">
+                        <font>
+                            <Font size="14.0" />
+                        </font>
+                    </Label>
+
+                    <TextField fx:id="idField" promptText="Equipment ID"/>
+                    <TextField fx:id="modelField" promptText="Model"/>
+                    <TextField fx:id="powerField" promptText="Engine Power"/>
+                    <TextField fx:id="rateField" promptText="Hourly Rate"/>
+                    <TextField fx:id="statusField" promptText="Status"/>
+                    <TextField fx:id="typeField" promptText="Type"/>
+
+                    <Separator/>
+
+                    <HBox spacing="10.0" alignment="CENTER">
+
+                        <Button text="Insert"
+                                onAction="#handleInsert"
+                                style="-fx-background-color:#27ae60;"
+                                textFill="WHITE"/>
+
+                        <Button text="Update"
+                                onAction="#handleUpdate"
+                                style="-fx-background-color:#2980b9;"
+                                textFill="WHITE"/>
+
+                        <Button text="Delete"
+                                onAction="#handleDelete"
+                                style="-fx-background-color:#c0392b;"
+                                textFill="WHITE"/>
+
+                    </HBox>
+
+                </VBox>
+
+                <!-- RIGHT TABLE -->
+                <VBox spacing="10.0" HBox.hgrow="ALWAYS">
+
+                    <Button text="Refresh Table"
+                            onAction="#handleRefresh"/>
+
+                    <TableView fx:id="equipmentTable" VBox.vgrow="ALWAYS">
+
+                        <columns>
+
+                            <TableColumn fx:id="colId" text="ID" prefWidth="80"/>
+                            <TableColumn fx:id="colModel" text="Model" prefWidth="150"/>
+                            <TableColumn fx:id="colPower" text="Power" prefWidth="120"/>
+                            <TableColumn fx:id="colRate" text="Rate" prefWidth="120"/>
+                            <TableColumn fx:id="colStatus" text="Status" prefWidth="120"/>
+
+                        </columns>
+
+                    </TableView>
+
+                </VBox>
+
+            </HBox>
+
+        </VBox>
+
+    </children>
+
+</AnchorPane>

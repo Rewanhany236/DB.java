@@ -11,4 +11,17 @@ public class DBConnection {
 
         return DriverManager.getConnection(url, user, pass);
     }
+    public static void main(String[] args) {
+        try {
+            System.out.println("Checking connection...");
+            Connection con = getConnection();
+            if (con != null) {
+                System.out.println("✅ Connection Successful! The database is ready.");
+                con.close();
+            }
+        } catch (Exception e) {
+            System.out.println("❌ Connection Failed!");
+            e.printStackTrace(); // ده هيقولنا بالظبط لو المشكلة في الباسورد أو الـ Port
+        }
+    }
 }

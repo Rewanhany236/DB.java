@@ -9,6 +9,14 @@
     <children>
         <VBox spacing="15.0" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="15.0">
             <children>
+                <Button text="← Go Back"
+                        onAction="#handleGoBack"
+                        prefWidth="120"
+                        style="-fx-background-color:#34495e;
+                       -fx-text-fill:white;
+                       -fx-font-weight:bold;
+                       -fx-background-radius:10;" />
+
                 <Label text="Rental Agreement Management" textFill="#8e44ad">
                     <font>
                         <Font name="System Bold" size="24.0" />
@@ -58,7 +66,7 @@
                                                 <CheckMenuItem fx:id="menuStatus" selected="true" text="Status" onAction="#handleColumnVisibility"/>
                                             </items>
                                         </MenuButton>
-                                      <Button onAction="#handleRefreshTable" text="Normal View" />
+                                        <Button onAction="#handleRefreshTable" text="Normal View" />
                                         <Button onAction="#handleGenerateJoinReport" style="-fx-background-color: #8e44ad;" text="Join Report (Details)" textFill="WHITE" />
                                     </children>
                                 </HBox>
