@@ -21,7 +21,7 @@ public class DBConnection {
             }
         } catch (Exception e) {
             System.out.println("❌ Connection Failed!");
-            e.printStackTrace(); // ده هيقولنا بالظبط لو المشكلة في الباسورد أو الـ Port
+            e.printStackTrace();
         }
     }
 }

@@ -2,106 +2,237 @@ package com.example.demo9.dao;
 
 import com.example.demo9.database.DBConnection;
 import com.example.demo9.model.RentalAgreement;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class RentalAgreementDAO {
 
-    // 1. INSERT Statement
+    // ================= GET ALL WITH JOIN  =================
+    public List<RentalAgreement> getAllWithContractor() throws Exception {
+        Connection con = DBConnection.getConnection();
+
+        String sql = """
+            SELECT 
+                R.RENTAL_ID_,
+                R.CONTRACTOR_ID_,
+                C.COMPANY_NAME AS CONTRACTOR_NAME,
+                R.START_DATE,
+                R.END_DATE,
+                R.TOTAL_COST,
+                R.TOTAL_HOURS,
+                R.RENTAL_STATUS
+            FROM RENTAL_AGREEMENT R
+            JOIN CONTRACTOR C ON R.CONTRACTOR_ID_ = C.CONTRACTOR_ID_
+            ORDER BY R.RENTAL_ID_
+        """;
+
+        Statement stmt = con.createStatement();
+        ResultSet rs = stmt.executeQuery(sql);
+
+        List<RentalAgreement> list = new ArrayList<>();
+
+        while (rs.next()) {
+            list.add(new RentalAgreement(
+                    rs.getInt("RENTAL_ID_"),
+                    rs.getInt("CONTRACTOR_ID_"),
+                    rs.getString("CONTRACTOR_NAME"),
+                    rs.getString("START_DATE"),
+                    rs.getString("END_DATE"),
+                    rs.getDouble("TOTAL_COST"),
+                    rs.getInt("TOTAL_HOURS"),
+                    rs.getString("RENTAL_STATUS")
+            ));
+        }
+
+        con.close();
+        return list;
+    }
+
+    // ================= GET ALL WITHOUT JOIN =================
+    public List<RentalAgreement> getAllSimple() throws Exception {
+        Connection con = DBConnection.getConnection();
+
+        String sql = "SELECT * FROM RENTAL_AGREEMENT ORDER BY RENTAL_ID_";
+
+        Statement stmt = con.createStatement();
+        ResultSet rs = stmt.executeQuery(sql);
+
+        List<RentalAgreement> list = new ArrayList<>();
+
+        while (rs.next()) {
+            list.add(new RentalAgreement(
+                    rs.getInt("RENTAL_ID_"),
+                    rs.getInt("CONTRACTOR_ID_"),
+                    "",  // اسم المقاول فاضي
+                    rs.getString("START_DATE"),
+                    rs.getString("END_DATE"),
+                    rs.getDouble("TOTAL_COST"),
+                    rs.getInt("TOTAL_HOURS"),
+                    rs.getString("RENTAL_STATUS")
+            ));
+        }
+
+        con.close();
+        return list;
+    }
+
+    // ================= SEARCH BY ID =================
+    public RentalAgreement searchById(int id) throws Exception {
+        Connection con = DBConnection.getConnection();
+
+        String sql = """
+            SELECT 
+                R.RENTAL_ID_,
+                R.CONTRACTOR_ID_,
+                C.COMPANY_NAME AS CONTRACTOR_NAME,
+                R.START_DATE,
+                R.END_DATE,
+                R.TOTAL_COST,
+                R.TOTAL_HOURS,
+                R.RENTAL_STATUS
+            FROM RENTAL_AGREEMENT R
+            JOIN CONTRACTOR C ON R.CONTRACTOR_ID_ = C.CONTRACTOR_ID_
+            WHERE R.RENTAL_ID_ = ?
+        """;
+
+        PreparedStatement ps = con.prepareStatement(sql);
+        ps.setInt(1, id);
+        ResultSet rs = ps.executeQuery();
+
+        RentalAgreement rental = null;
+
+        if (rs.next()) {
+            rental = new RentalAgreement(
+                    rs.getInt("RENTAL_ID_"),
+                    rs.getInt("CONTRACTOR_ID_"),
+                    rs.getString("CONTRACTOR_NAME"),
+                    rs.getString("START_DATE"),
+                    rs.getString("END_DATE"),
+                    rs.getDouble("TOTAL_COST"),
+                    rs.getInt("TOTAL_HOURS"),
+                    rs.getString("RENTAL_STATUS")
+            );
+        }
+
+        con.close();
+        return rental;
+    }
+
+    // ================= INSERT =================
     public void insertRental(RentalAgreement r) throws Exception {
         Connection con = DBConnection.getConnection();
-        String sql = "INSERT INTO dbo.RENTAL_AGREEMENT (RENTAL_ID_, CONTRACTOR_ID_, START_DATE, END_DATE, TOTAL_COST, TOTAL_HOURS, RENTAL_STATUS) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
-        PreparedStatement pstmt = con.prepareStatement(sql);
-        pstmt.setInt(1, r.getRentalId());
-        pstmt.setInt(2, r.getContractorId());
-        pstmt.setString(3, r.getStartDate());
-        pstmt.setString(4, r.getEndDate());
-        pstmt.setDouble(5, r.getTotalCost());
-        pstmt.setInt(6, r.getTotalHours());
-        pstmt.setString(7, r.getRentalStatus());
+        String sql = """
+            INSERT INTO RENTAL_AGREEMENT 
+            (RENTAL_ID_, CONTRACTOR_ID_, START_DATE, END_DATE, TOTAL_COST, TOTAL_HOURS, RENTAL_STATUS)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """;
 
-        pstmt.executeUpdate();
+        PreparedStatement ps = con.prepareStatement(sql);
+        ps.setInt(1, r.getRentalId());
+        ps.setInt(2, r.getContractorId());
+        ps.setString(3, r.getStartDate());
+        ps.setString(4, r.getEndDate());
+        ps.setDouble(5, r.getTotalCost());
+        ps.setInt(6, r.getTotalHours());
+        ps.setString(7, r.getRentalStatus());
+
+        ps.executeUpdate();
         con.close();
     }
 
-    // 2. UPDATE Statement (With Condition)
+    // ================= UPDATE =================
+    public void updateRental(RentalAgreement r) throws Exception {
+        Connection con = DBConnection.getConnection();
+
+        String sql = """
+            UPDATE RENTAL_AGREEMENT 
+            SET CONTRACTOR_ID_=?, START_DATE=?, END_DATE=?, TOTAL_COST=?, TOTAL_HOURS=?, RENTAL_STATUS=?
+            WHERE RENTAL_ID_=?
+        """;
+
+        PreparedStatement ps = con.prepareStatement(sql);
+        ps.setInt(1, r.getContractorId());
+        ps.setString(2, r.getStartDate());
+        ps.setString(3, r.getEndDate());
+        ps.setDouble(4, r.getTotalCost());
+        ps.setInt(5, r.getTotalHours());
+        ps.setString(6, r.getRentalStatus());
+        ps.setInt(7, r.getRentalId());
+
+        ps.executeUpdate();
+        con.close();
+    }
+
+    // ================= UPDATE STATUS =================
     public void updateRentalStatus(int rentalId, String newStatus) throws Exception {
         Connection con = DBConnection.getConnection();
-        String sql = "UPDATE dbo.RENTAL_AGREEMENT SET RENTAL_STATUS = ? WHERE RENTAL_ID_ = ?";
 
-        PreparedStatement pstmt = con.prepareStatement(sql);
-        pstmt.setString(1, newStatus);
-        pstmt.setInt(2, rentalId);
+        String sql = "UPDATE RENTAL_AGREEMENT SET RENTAL_STATUS = ? WHERE RENTAL_ID_ = ?";
 
-        pstmt.executeUpdate();
+        PreparedStatement ps = con.prepareStatement(sql);
+        ps.setString(1, newStatus);
+        ps.setInt(2, rentalId);
+
+        ps.executeUpdate();
         con.close();
     }
 
-    // 3. DELETE Statement (With Condition)
+    // ================= DELETE =================
     public void deleteRental(int rentalId) throws Exception {
         Connection con = DBConnection.getConnection();
-        String sql = "DELETE FROM dbo.RENTAL_AGREEMENT WHERE RENTAL_ID_ = ?";
 
-        PreparedStatement pstmt = con.prepareStatement(sql);
-        pstmt.setInt(1, rentalId);
+        String sql = "DELETE FROM RENTAL_AGREEMENT WHERE RENTAL_ID_ = ?";
 
-        pstmt.executeUpdate();
+        PreparedStatement ps = con.prepareStatement(sql);
+        ps.setInt(1, rentalId);
+
+        ps.executeUpdate();
         con.close();
     }
 
-    public void getRentalData(boolean fetchAll) throws Exception {
-        Connection con = DBConnection.getConnection();
-        String sql;
-
-        if (fetchAll) {
-            sql = "SELECT * FROM dbo.RENTAL_AGREEMENT";
-        } else {
-            // Specific columns (ID, Cost, and Status)
-            sql = "SELECT RENTAL_ID_, TOTAL_COST, RENTAL_STATUS FROM dbo.RENTAL_AGREEMENT";
-        }
-
-        Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery(sql);
-
-        System.out.println("--- Rental Agreement Data (FetchAll: " + fetchAll + ") ---");
-
-        while (rs.next()) {
-            if (fetchAll) {
-                System.out.println("ID: " + rs.getInt("RENTAL_ID_") +
-                        " | Contractor ID: " + rs.getInt("CONTRACTOR_ID_") +
-                        " | Cost: " + rs.getDouble("TOTAL_COST") +
-                        " | Status: " + rs.getString("RENTAL_STATUS"));
-            } else {
-                System.out.println("ID: " + rs.getInt("RENTAL_ID_") +
-                        " | Cost: " + rs.getDouble("TOTAL_COST") +
-                        " | Status: " + rs.getString("RENTAL_STATUS"));
-            }
-        }
-        con.close();
-    }
-    // 5. SELECT with JOIN (Between Equipment and Rental Agreement)
-    public void getEquipmentRentalJoin() throws Exception {
+    // ================= SEARCH BY CONTRACTOR NAME =================
+    public List<RentalAgreement> searchByContractorName(String contractorName) throws Exception {
         Connection con = DBConnection.getConnection();
 
-        String sql = "SELECT E.MODEL, E.EQUIPMENT_ID_, R.RENTAL_ID_, R.TOTAL_COST, R.RENTAL_STATUS " +
-                "FROM dbo.EQUIPMENT E " +
-                "JOIN dbo.INCLUDES I ON E.EQUIPMENT_ID_ = I.EQUIPMENT_ID_ " +
-                "JOIN dbo.RENTAL_AGREEMENT R ON I.RENTAL_ID_ = R.RENTAL_ID_";
+        String sql = """
+            SELECT 
+                R.RENTAL_ID_,
+                R.CONTRACTOR_ID_,
+                C.COMPANY_NAME AS CONTRACTOR_NAME,
+                R.START_DATE,
+                R.END_DATE,
+                R.TOTAL_COST,
+                R.TOTAL_HOURS,
+                R.RENTAL_STATUS
+            FROM RENTAL_AGREEMENT R
+            JOIN CONTRACTOR C ON R.CONTRACTOR_ID_ = C.CONTRACTOR_ID_
+            WHERE C.COMPANY_NAME LIKE ?
+            ORDER BY R.RENTAL_ID_
+        """;
 
-        Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery(sql);
+        PreparedStatement ps = con.prepareStatement(sql);
+        ps.setString(1, "%" + contractorName + "%");
+        ResultSet rs = ps.executeQuery();
 
-        System.out.println("--- Equipment Rental Join Report ---");
+        List<RentalAgreement> list = new ArrayList<>();
+
         while (rs.next()) {
-            System.out.println("Model: " + rs.getString("MODEL") +
-                    " | EquipmentID: " + rs.getInt("EQUIPMENT_ID_") +
-                    " | RentalID: " + rs.getInt("RENTAL_ID_") +
-                    " | Cost: " + rs.getDouble("TOTAL_COST") +
-                    " | Status: " + rs.getString("RENTAL_STATUS"));
+            list.add(new RentalAgreement(
+                    rs.getInt("RENTAL_ID_"),
+                    rs.getInt("CONTRACTOR_ID_"),
+                    rs.getString("CONTRACTOR_NAME"),
+                    rs.getString("START_DATE"),
+                    rs.getString("END_DATE"),
+                    rs.getDouble("TOTAL_COST"),
+                    rs.getInt("TOTAL_HOURS"),
+                    rs.getString("RENTAL_STATUS")
+            ));
         }
+
         con.close();
+        return list;
     }
 }

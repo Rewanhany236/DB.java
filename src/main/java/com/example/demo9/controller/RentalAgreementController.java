@@ -1,522 +1,279 @@
 package com.example.demo9.controller;
 
 import com.example.demo9.dao.RentalAgreementDAO;
-import com.example.demo9.database.DBConnection;
 import com.example.demo9.model.RentalAgreement;
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-
 import javafx.event.ActionEvent;
-
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-
 import javafx.scene.Node;
 import javafx.scene.Scene;
-
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-
 import javafx.stage.Stage;
-
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
 
 public class RentalAgreementController {
 
     // ================= FIELDS =================
+    @FXML private TextField rentalIdField;
+    @FXML private TextField contractorIdField;
+    @FXML private TextField contractorNameField;
+    @FXML private DatePicker startDatePicker;
+    @FXML private DatePicker endDatePicker;
+    @FXML private TextField totalCostField;
+    @FXML private TextField totalHoursField;
+    @FXML private TextField rentalStatusField;
+    @FXML private TextField searchField;
 
-    @FXML
-    private TextField rentalIdField;
-
-    @FXML
-    private TextField contractorIdField;
-
-    @FXML
-    private TextField equipmentIdField;
-
-    @FXML
-    private DatePicker startDatePicker;
-
-    @FXML
-    private DatePicker endDatePicker;
-
-    @FXML
-    private TextField totalCostField;
-
-    @FXML
-    private TextField rentalStatusField;
-
-    // ================= JOIN =================
-
-    @FXML
-    private ComboBox<String> joinComboBox;
+    // ================= TOGGLE BUTTON =================
+    @FXML private ToggleButton joinToggleButton;
 
     // ================= TABLE =================
-
-    @FXML
-    private TableView<RentalAgreementCustom> rentalTable;
-
-    @FXML
-    private TableColumn<RentalAgreementCustom, Integer> colRentalId;
-
-    @FXML
-    private TableColumn<RentalAgreementCustom, String> colContName;
-
-    @FXML
-    private TableColumn<RentalAgreementCustom, String> colEquipModel;
-
-    @FXML
-    private TableColumn<RentalAgreementCustom, Double> colTotalCost;
-
-    @FXML
-    private TableColumn<RentalAgreementCustom, String> colRentalStatus;
-
-    // ================= MENU =================
-
-    @FXML
-    private CheckMenuItem menuRentalId;
-
-    @FXML
-    private CheckMenuItem menuContName;
-
-    @FXML
-    private CheckMenuItem menuEquipModel;
-
-    @FXML
-    private CheckMenuItem menuCost;
-
-    @FXML
-    private CheckMenuItem menuStatus;
+    @FXML private TableView<RentalAgreement> rentalTable;
+    @FXML private TableColumn<RentalAgreement, Integer> colRentalId;
+    @FXML private TableColumn<RentalAgreement, Integer> colContractorId;
+    @FXML private TableColumn<RentalAgreement, String> colContractorName;
+    @FXML private TableColumn<RentalAgreement, String> colStartDate;
+    @FXML private TableColumn<RentalAgreement, String> colEndDate;
+    @FXML private TableColumn<RentalAgreement, Double> colTotalCost;
+    @FXML private TableColumn<RentalAgreement, Integer> colTotalHours;
+    @FXML private TableColumn<RentalAgreement, String> colRentalStatus;
 
     // ================= STATUS =================
-
-    @FXML
-    private Label statusLabel;
+    @FXML private Label statusLabel;
 
     // ================= DAO =================
-
-    private final RentalAgreementDAO dao =
-            new RentalAgreementDAO();
-
-    // ================= DATA =================
-
-    private final ObservableList<RentalAgreementCustom> tableData =
-            FXCollections.observableArrayList();
+    private final RentalAgreementDAO dao = new RentalAgreementDAO();
+    private final ObservableList<RentalAgreement> rentalList = FXCollections.observableArrayList();
 
     // ================= INITIALIZE =================
-
     @FXML
     public void initialize() {
+        // Setup table columns
+        colRentalId.setCellValueFactory(new PropertyValueFactory<>("rentalId"));
+        colContractorId.setCellValueFactory(new PropertyValueFactory<>("contractorId"));
+        colContractorName.setCellValueFactory(new PropertyValueFactory<>("contractorName"));
+        colStartDate.setCellValueFactory(new PropertyValueFactory<>("startDate"));
+        colEndDate.setCellValueFactory(new PropertyValueFactory<>("endDate"));
+        colTotalCost.setCellValueFactory(new PropertyValueFactory<>("totalCost"));
+        colTotalHours.setCellValueFactory(new PropertyValueFactory<>("totalHours"));
+        colRentalStatus.setCellValueFactory(new PropertyValueFactory<>("rentalStatus"));
 
-        colRentalId.setCellValueFactory(
-                new PropertyValueFactory<>("rentalId"));
+        rentalTable.setItems(rentalList);
 
-        colContName.setCellValueFactory(
-                new PropertyValueFactory<>("contractorName"));
+        // Toggle button text
+        joinToggleButton.setText("Show Contractor Name");
 
-        colEquipModel.setCellValueFactory(
-                new PropertyValueFactory<>("equipmentModel"));
+        // Load data when toggled
+        joinToggleButton.selectedProperty().addListener((obs, old, newValue) -> {
+            loadData();
+        });
 
-        colTotalCost.setCellValueFactory(
-                new PropertyValueFactory<>("totalCost"));
-
-        colRentalStatus.setCellValueFactory(
-                new PropertyValueFactory<>("status"));
-
-        rentalTable.setItems(tableData);
-
-        joinComboBox.getItems().addAll(
-                "No Join",
-                "Join Contractor",
-                "Join Equipment",
-                "Full Join"
+        // Load data when clicking on row
+        rentalTable.getSelectionModel().selectedItemProperty().addListener(
+                (obs, old, newValue) -> {
+                    if (newValue != null) {
+                        fillFields(newValue);
+                    }
+                }
         );
-
-        joinComboBox.setValue("No Join");
 
         loadData();
     }
 
-    // ================= LOAD =================
+    // ================= FILL FIELDS =================
+    private void fillFields(RentalAgreement rental) {
+        rentalIdField.setText(String.valueOf(rental.getRentalId()));
+        contractorIdField.setText(String.valueOf(rental.getContractorId()));
+        contractorNameField.setText(rental.getContractorName());
+        totalCostField.setText(String.valueOf(rental.getTotalCost()));
+        totalHoursField.setText(String.valueOf(rental.getTotalHours()));
+        rentalStatusField.setText(rental.getRentalStatus());
 
+        if (rental.getStartDate() != null && !rental.getStartDate().isEmpty()) {
+            startDatePicker.setValue(java.time.LocalDate.parse(rental.getStartDate()));
+        }
+        if (rental.getEndDate() != null && !rental.getEndDate().isEmpty()) {
+            endDatePicker.setValue(java.time.LocalDate.parse(rental.getEndDate()));
+        }
+    }
+
+    // ================= LOAD DATA =================
     private void loadData() {
-
         try {
+            rentalList.clear();
 
-            tableData.clear();
-
-            Connection con =
-                    DBConnection.getConnection();
-
-            String selected =
-                    joinComboBox.getValue();
-
-            String sql;
-
-            switch (selected) {
-
-                case "Join Contractor":
-
-                    sql =
-                            """
-                            SELECT
-                            R.RENTAL_ID_,
-                            C.COMPANY_NAME,
-                            'N/A' AS MODEL,
-                            R.TOTAL_COST,
-                            R.RENTAL_STATUS
-                            FROM RENTAL_AGREEMENT R
-                            JOIN CONTRACTOR C
-                            ON R.CONTRACTOR_ID_ = C.CONTRACTOR_ID_
-                            """;
-
-                    break;
-
-                case "Join Equipment":
-
-                    sql =
-                            """
-                            SELECT
-                            R.RENTAL_ID_,
-                            'N/A' AS COMPANY_NAME,
-                            E.MODEL,
-                            R.TOTAL_COST,
-                            R.RENTAL_STATUS
-                            FROM RENTAL_AGREEMENT R
-                            JOIN INCLUDES I
-                            ON R.RENTAL_ID_ = I.RENTAL_ID_
-                            JOIN EQUIPMENT E
-                            ON I.EQUIPMENT_ID_ = E.EQUIPMENT_ID_
-                            """;
-
-                    break;
-
-                case "Full Join":
-
-                    sql =
-                            """
-                            SELECT
-                            R.RENTAL_ID_,
-                            C.COMPANY_NAME,
-                            E.MODEL,
-                            R.TOTAL_COST,
-                            R.RENTAL_STATUS
-                            FROM RENTAL_AGREEMENT R
-                            JOIN CONTRACTOR C
-                            ON R.CONTRACTOR_ID_ = C.CONTRACTOR_ID_
-                            JOIN INCLUDES I
-                            ON R.RENTAL_ID_ = I.RENTAL_ID_
-                            JOIN EQUIPMENT E
-                            ON I.EQUIPMENT_ID_ = E.EQUIPMENT_ID_
-                            """;
-
-                    break;
-
-                default:
-
-                    sql =
-                            """
-                            SELECT
-                            RENTAL_ID_,
-                            'N/A' AS COMPANY_NAME,
-                            'N/A' AS MODEL,
-                            TOTAL_COST,
-                            RENTAL_STATUS
-                            FROM RENTAL_AGREEMENT
-                            """;
+            if (joinToggleButton.isSelected()) {
+                rentalList.addAll(dao.getAllWithContractor());
+                setStatus("Loaded with Contractor Name - " + rentalList.size() + " records", true);
+            } else {
+                rentalList.addAll(dao.getAllSimple());
+                setStatus("Loaded Simple View - " + rentalList.size() + " records", true);
             }
-
-            Statement stmt =
-                    con.createStatement();
-
-            ResultSet rs =
-                    stmt.executeQuery(sql);
-
-            while (rs.next()) {
-
-                tableData.add(
-
-                        new RentalAgreementCustom(
-
-                                rs.getInt("RENTAL_ID_"),
-
-                                rs.getString("COMPANY_NAME"),
-
-                                rs.getString("MODEL"),
-
-                                rs.getDouble("TOTAL_COST"),
-
-                                rs.getString("RENTAL_STATUS")
-                        )
-                );
-            }
-
-            con.close();
-
-            setStatus(
-                    "Loaded Successfully",
-                    true
-            );
 
         } catch (Exception e) {
+            setStatus("Load Failed: " + e.getMessage(), false);
+            e.printStackTrace();
+        }
+    }
 
-            setStatus(
-                    "Load Failed : " + e.getMessage(),
-                    false
-            );
+    // ================= SEARCH =================
+    @FXML
+    private void handleSearch() {
+        try {
+            String searchText = searchField.getText().trim();
+
+            if (searchText.isEmpty()) {
+                loadData();
+                return;
+            }
+
+            rentalList.clear();
+            rentalList.addAll(dao.searchByContractorName(searchText));
+            setStatus("Found " + rentalList.size() + " records matching: " + searchText, true);
+
+        } catch (Exception e) {
+            setStatus("Search Failed: " + e.getMessage(), false);
+            e.printStackTrace();
         }
     }
 
     // ================= INSERT =================
-
     @FXML
-    private void handleInsertRental() {
-
+    private void handleInsert() {
         try {
-
-            RentalAgreement rental =
-                    new RentalAgreement(
-
-                            Integer.parseInt(
-                                    rentalIdField.getText()),
-
-                            Integer.parseInt(
-                                    contractorIdField.getText()),
-
-                            startDatePicker.getValue().toString(),
-
-                            endDatePicker.getValue().toString(),
-
-                            Double.parseDouble(
-                                    totalCostField.getText()),
-
-                            0,
-
-                            rentalStatusField.getText()
-                    );
+            RentalAgreement rental = new RentalAgreement(
+                    Integer.parseInt(rentalIdField.getText().trim()),
+                    Integer.parseInt(contractorIdField.getText().trim()),
+                    "",
+                    startDatePicker.getValue().toString(),
+                    endDatePicker.getValue().toString(),
+                    Double.parseDouble(totalCostField.getText().trim()),
+                    Integer.parseInt(totalHoursField.getText().trim()),
+                    rentalStatusField.getText().trim()
+            );
 
             dao.insertRental(rental);
-
-            setStatus(
-                    "Inserted Successfully",
-                    true
-            );
-
+            setStatus("Inserted Successfully", true);
             loadData();
+            clearFields();
 
         } catch (Exception e) {
-
-            setStatus(
-                    "Insert Failed : " + e.getMessage(),
-                    false
-            );
+            setStatus("Insert Failed: " + e.getMessage(), false);
+            e.printStackTrace();
         }
     }
 
     // ================= UPDATE =================
-
     @FXML
-    private void handleUpdateRental() {
-
+    private void handleUpdate() {
         try {
+            String idText = rentalIdField.getText().trim();
+            if (idText.isEmpty()) {
+                setStatus("Please select a rental first", false);
+                return;
+            }
 
-            int id =
-                    Integer.parseInt(
-                            rentalIdField.getText());
-
-            String status =
-                    rentalStatusField.getText();
-
-            dao.updateRentalStatus(id, status);
-
-            setStatus(
-                    "Updated Successfully",
-                    true
+            RentalAgreement rental = new RentalAgreement(
+                    Integer.parseInt(idText),
+                    Integer.parseInt(contractorIdField.getText().trim()),
+                    "",
+                    startDatePicker.getValue().toString(),
+                    endDatePicker.getValue().toString(),
+                    Double.parseDouble(totalCostField.getText().trim()),
+                    Integer.parseInt(totalHoursField.getText().trim()),
+                    rentalStatusField.getText().trim()
             );
 
+            dao.updateRental(rental);
+            setStatus("Updated Successfully", true);
             loadData();
+            clearFields();
 
         } catch (Exception e) {
-
-            setStatus(
-                    "Update Failed : " + e.getMessage(),
-                    false
-            );
+            setStatus("Update Failed: " + e.getMessage(), false);
+            e.printStackTrace();
         }
     }
 
     // ================= DELETE =================
-
     @FXML
-    private void handleDeleteRental() {
-
+    private void handleDelete() {
         try {
+            String idText = rentalIdField.getText().trim();
 
-            int id =
-                    Integer.parseInt(
-                            rentalIdField.getText());
+            if (idText.isEmpty()) {
+                RentalAgreement selected = rentalTable.getSelectionModel().getSelectedItem();
+                if (selected == null) {
+                    setStatus("Please select a rental first", false);
+                    return;
+                }
+                idText = String.valueOf(selected.getRentalId());
+            }
 
-            dao.deleteRental(id);
+            int id = Integer.parseInt(idText);
 
-            setStatus(
-                    "Deleted Successfully",
-                    true
-            );
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Confirm Delete");
+            alert.setHeaderText(null);
+            alert.setContentText("Are you sure you want to delete rental ID: " + id + "?");
 
-            loadData();
+            if (alert.showAndWait().get() == ButtonType.OK) {
+                dao.deleteRental(id);
+                setStatus("Deleted Successfully", true);
+                loadData();
+                clearFields();
+            }
 
         } catch (Exception e) {
-
-            setStatus(
-                    "Delete Failed : " + e.getMessage(),
-                    false
-            );
+            setStatus("Delete Failed: " + e.getMessage(), false);
+            e.printStackTrace();
         }
     }
 
     // ================= REFRESH =================
-
     @FXML
-    private void handleRefreshTable() {
-
+    private void handleRefresh() {
         loadData();
+        clearFields();
     }
 
-    // ================= JOIN =================
-
-    @FXML
-    private void handleGenerateJoinReport() {
-
-        loadData();
-    }
-
-    // ================= COLUMN VISIBILITY =================
-
-    @FXML
-    private void handleColumnVisibility() {
-
-        colRentalId.setVisible(
-                menuRentalId.isSelected());
-
-        colContName.setVisible(
-                menuContName.isSelected());
-
-        colEquipModel.setVisible(
-                menuEquipModel.isSelected());
-
-        colTotalCost.setVisible(
-                menuCost.isSelected());
-
-        colRentalStatus.setVisible(
-                menuStatus.isSelected());
+    // ================= CLEAR FIELDS =================
+    private void clearFields() {
+        rentalIdField.clear();
+        contractorIdField.clear();
+        contractorNameField.clear();
+        totalCostField.clear();
+        totalHoursField.clear();
+        rentalStatusField.clear();
+        startDatePicker.setValue(null);
+        endDatePicker.setValue(null);
     }
 
     // ================= STATUS =================
-
     private void setStatus(String message, boolean success) {
-
         if (statusLabel != null) {
-
             statusLabel.setText(message);
-
             if (success) {
-
-                statusLabel.setStyle(
-                        "-fx-text-fill: green; -fx-font-weight: bold;"
-                );
-
+                statusLabel.setStyle("-fx-text-fill: green; -fx-font-weight: bold;");
             } else {
-
-                statusLabel.setStyle(
-                        "-fx-text-fill: red; -fx-font-weight: bold;"
-                );
+                statusLabel.setStyle("-fx-text-fill: red; -fx-font-weight: bold;");
             }
         }
     }
 
     // ================= GO BACK =================
-
     @FXML
     private void handleGoBack(ActionEvent event) {
-
         try {
-
-            FXMLLoader loader =
-                    new FXMLLoader(
-                            getClass().getResource(
-                                    "/com/example/demo9/MainView.fxml"
-                            )
-                    );
-
-            Scene scene =
-                    new Scene(loader.load());
-
-            Stage stage =
-                    (Stage) ((Node)
-                            event.getSource())
-                            .getScene()
-                            .getWindow();
-
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/demo9/MainView.fxml"));
+            Scene scene = new Scene(loader.load());
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(scene);
-
             stage.show();
-
         } catch (Exception e) {
-
             e.printStackTrace();
-        }
-    }
-
-    // ================= CUSTOM CLASS =================
-
-    public static class RentalAgreementCustom {
-
-        private final int rentalId;
-
-        private final String contractorName;
-
-        private final String equipmentModel;
-
-        private final double totalCost;
-
-        private final String status;
-
-        public RentalAgreementCustom(
-                int rentalId,
-                String contractorName,
-                String equipmentModel,
-                double totalCost,
-                String status
-        ) {
-
-            this.rentalId = rentalId;
-            this.contractorName = contractorName;
-            this.equipmentModel = equipmentModel;
-            this.totalCost = totalCost;
-            this.status = status;
-        }
-
-        public int getRentalId() {
-            return rentalId;
-        }
-
-        public String getContractorName() {
-            return contractorName;
-        }
-
-        public String getEquipmentModel() {
-            return equipmentModel;
-        }
-
-        public double getTotalCost() {
-            return totalCost;
-        }
-
-        public String getStatus() {
-            return status;
         }
     }
 }

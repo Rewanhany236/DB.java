@@ -1,15 +1,16 @@
 package com.example.demo9.model;
 
 public class Equipment {
-    private int equipmentId;      // EQUIPMENT_ID_ (PK)
-    private Integer yardId;       // YARD_ID (FK)
-    private String model;         // MODEL
-    private int enginePower;      // ENGINE_POWER
-    private double hourlyRate;    // HOURLY_RATE
-    private String status;        // STATUS_
-    private String currentLocation; // CURRENT_LOCATION
-    private String equipmentType; // EQUIPMENT_TYPE
+    private int equipmentId;
+    private Integer yardId;
+    private String model;
+    private int enginePower;
+    private double hourlyRate;
+    private String status;
+    private String currentLocation;
+    private String equipmentType;
 
+    // Constructor
     public Equipment(int equipmentId, Integer yardId, String model, int enginePower,
                      double hourlyRate, String status, String currentLocation, String equipmentType) {
         this.equipmentId = equipmentId;
@@ -32,8 +33,7 @@ public class Equipment {
     public String getCurrentLocation() { return currentLocation; }
     public String getEquipmentType() { return equipmentType; }
 
-
-    // setters
+    // Setters
     public void setEquipmentId(int equipmentId) { this.equipmentId = equipmentId; }
     public void setYardId(Integer yardId) { this.yardId = yardId; }
     public void setModel(String model) { this.model = model; }
