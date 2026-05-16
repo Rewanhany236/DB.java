@@ -33,7 +33,7 @@
 
                                 <TextField fx:id="rentalIdField" promptText="Rental ID" />
                                 <TextField fx:id="contractorIdField" promptText="Contractor ID" />
-                                <TextField fx:id="contractorNameField" promptText="Contractor Name" editable="false"
+                                <TextField fx:id="contractorNameField" promptText="Company Name" editable="false"
                                            style="-fx-background-color: #f0f0f0; -fx-text-fill: #555;" />
 
                                 <DatePicker fx:id="startDatePicker" promptText="Start Date" prefWidth="350.0" />
@@ -60,7 +60,7 @@
                                 <!-- Search Row -->
                                 <HBox alignment="CENTER" spacing="10.0">
                                     <children>
-                                        <TextField fx:id="searchField" promptText="Search by Contractor Name" HBox.hgrow="ALWAYS" />
+                                        <TextField fx:id="searchField" promptText="Search by Company Name" HBox.hgrow="ALWAYS" />
                                         <Button onAction="#handleSearch" text="Search"
                                                 style="-fx-background-color: #f39c12; -fx-text-fill: white;" />
                                     </children>
@@ -78,7 +78,7 @@
                                 <HBox alignment="CENTER_LEFT" spacing="10.0">
                                     <children>
                                         <Label text="View Mode:" />
-                                        <ToggleButton fx:id="joinToggleButton" text="Show Contractor Name"
+                                        <ToggleButton fx:id="joinToggleButton" text="Show Company Name"
                                                       style="-fx-background-color: #8e44ad; -fx-text-fill: white;" />
 
                                         <Separator orientation="VERTICAL" prefHeight="30.0" />
@@ -93,7 +93,7 @@
                                     <columns>
                                         <TableColumn fx:id="colRentalId" prefWidth="80.0" text="Rental ID" />
                                         <TableColumn fx:id="colContractorId" prefWidth="100.0" text="Contractor ID" />
-                                        <TableColumn fx:id="colContractorName" prefWidth="200.0" text="Contractor Name" />
+                                        <TableColumn fx:id="colContractorName" prefWidth="200.0" text="Company Name" />
                                         <TableColumn fx:id="colStartDate" prefWidth="120.0" text="Start Date" />
                                         <TableColumn fx:id="colEndDate" prefWidth="120.0" text="End Date" />
                                         <TableColumn fx:id="colTotalCost" prefWidth="100.0" text="Total Cost" />

@@ -17,7 +17,7 @@ public class RentalAgreementDAO {
             SELECT 
                 R.RENTAL_ID_,
                 R.CONTRACTOR_ID_,
-                C.COMPANY_NAME AS CONTRACTOR_NAME,
+                C.COMPANY_NAME AS Company_NAME,
                 R.START_DATE,
                 R.END_DATE,
                 R.TOTAL_COST,
@@ -37,7 +37,7 @@ public class RentalAgreementDAO {
             list.add(new RentalAgreement(
                     rs.getInt("RENTAL_ID_"),
                     rs.getInt("CONTRACTOR_ID_"),
-                    rs.getString("CONTRACTOR_NAME"),
+                    rs.getString("Company_NAME"),
                     rs.getString("START_DATE"),
                     rs.getString("END_DATE"),
                     rs.getDouble("TOTAL_COST"),
@@ -65,7 +65,7 @@ public class RentalAgreementDAO {
             list.add(new RentalAgreement(
                     rs.getInt("RENTAL_ID_"),
                     rs.getInt("CONTRACTOR_ID_"),
-                    "",  // اسم المقاول فاضي
+                    "",
                     rs.getString("START_DATE"),
                     rs.getString("END_DATE"),
                     rs.getDouble("TOTAL_COST"),
@@ -107,7 +107,7 @@ public class RentalAgreementDAO {
             rental = new RentalAgreement(
                     rs.getInt("RENTAL_ID_"),
                     rs.getInt("CONTRACTOR_ID_"),
-                    rs.getString("CONTRACTOR_NAME"),
+                    rs.getString("Company_NAME"),
                     rs.getString("START_DATE"),
                     rs.getString("END_DATE"),
                     rs.getDouble("TOTAL_COST"),
@@ -223,7 +223,7 @@ public class RentalAgreementDAO {
             list.add(new RentalAgreement(
                     rs.getInt("RENTAL_ID_"),
                     rs.getInt("CONTRACTOR_ID_"),
-                    rs.getString("CONTRACTOR_NAME"),
+                    rs.getString("Company_NAME"),
                     rs.getString("START_DATE"),
                     rs.getString("END_DATE"),
                     rs.getDouble("TOTAL_COST"),

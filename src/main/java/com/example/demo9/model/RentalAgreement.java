@@ -3,7 +3,7 @@ package com.example.demo9.model;
 public class RentalAgreement {
     private int rentalId;
     private int contractorId;
-    private String contractorName;     // من الجوين
+    private String contractorName;
     private String startDate;
     private String endDate;
     private double totalCost;

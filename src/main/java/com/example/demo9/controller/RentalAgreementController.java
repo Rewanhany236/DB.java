@@ -70,7 +70,7 @@ public class RentalAgreementController {
             loadData();
         });
 
-        // Load data when clicking on row
+        // Load data when clicking on a row
         rentalTable.getSelectionModel().selectedItemProperty().addListener(
                 (obs, old, newValue) -> {
                     if (newValue != null) {
@@ -87,15 +87,51 @@ public class RentalAgreementController {
         rentalIdField.setText(String.valueOf(rental.getRentalId()));
         contractorIdField.setText(String.valueOf(rental.getContractorId()));
         contractorNameField.setText(rental.getContractorName());
+
         totalCostField.setText(String.valueOf(rental.getTotalCost()));
+
         totalHoursField.setText(String.valueOf(rental.getTotalHours()));
+
         rentalStatusField.setText(rental.getRentalStatus());
 
+        // ===== START DATE =====
         if (rental.getStartDate() != null && !rental.getStartDate().isEmpty()) {
-            startDatePicker.setValue(java.time.LocalDate.parse(rental.getStartDate()));
+
+            try {
+
+                String startDateOnly = rental.getStartDate().split(" ")[0];
+
+                startDatePicker.setValue(java.time.LocalDate.parse(startDateOnly));
+
+            } catch (Exception e) {
+
+                startDatePicker.setValue(null);
+
+                System.out.println("Invalid Start Date Format");
+            }
+        } else {
+
+            startDatePicker.setValue(null);
         }
+
+        // ===== END DATE =====
         if (rental.getEndDate() != null && !rental.getEndDate().isEmpty()) {
-            endDatePicker.setValue(java.time.LocalDate.parse(rental.getEndDate()));
+
+            try {
+
+                String endDateOnly = rental.getEndDate().split(" ")[0];
+
+                endDatePicker.setValue(java.time.LocalDate.parse(endDateOnly));
+
+            } catch (Exception e) {
+
+                endDatePicker.setValue(null);
+
+                System.out.println("Invalid End Date Format");
+            }
+        } else {
+
+            endDatePicker.setValue(null);
         }
     }
 
